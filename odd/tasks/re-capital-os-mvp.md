@@ -40,22 +40,22 @@ Real estate deals are evaluated manually, informally, and without standardized e
 - [x] **TASK-02**: Implement deterministic Financial Underwriting Engine in `core/underwriting.py` and unit tests in `tests/test_underwriting.py`
   - Route: Delegated direct (2 non-trivial files: implementation + tests)
   - Checks: Pytest suite passes (12 tests passed) verifying IRR, NPV, MOIC, cashflows, scenarios hierarchy, and sensitivity calculations.
-  - Evidence: Commit `503047f`
+  - Evidence: Commit `b0028bf`
 
-- [ ] **TASK-03**: Build Investment Memo generator in `core/memo.py`
+- [x] **TASK-03**: Build Investment Memo generator in `core/memo.py`
   - Route: Direct inline
-  - Checks: Generates clean, institutional Markdown memos conforming to Section 15 of master doc.
-  - Evidence: Commit hash pending.
+  - Checks: Generates clean, institutional Markdown memos conforming to Section 15 of master doc (Verified with unit test).
+  - Evidence: Commit `a9eb949`
 
-- [ ] **TASK-04**: Build AI Ingestion / Extraction Agent in `core/agents/ingestion.py`
+- [x] **TASK-04**: Build AI Ingestion / Extraction Agent in `core/agents/ingestion.py`
   - Route: Direct inline
-  - Checks: Converts raw property text/fichas into validated `Opportunity` objects.
-  - Evidence: Commit hash pending.
+  - Checks: Converts raw property text/fichas into validated `Opportunity` objects (Verified with unit tests).
+  - Evidence: Commit `6110c8f`
 
-- [ ] **TASK-05**: End-to-end validation script with a realistic Córdoba pilot deal in `scripts/run_pilot_deal.py`
+- [x] **TASK-05**: End-to-end validation script with a realistic Córdoba pilot deal in `scripts/run_pilot_deal.py`
   - Route: Direct inline
-  - Checks: Script executes end-to-end: Mandate + Opportunity -> Underwriting -> Memo -> Pipeline status check.
-  - Evidence: Commit hash pending.
+  - Checks: Script executes end-to-end: Mandate + Opportunity -> Underwriting -> Memo -> Pipeline status check (Verified with run_pilot_deal.py execution).
+  - Evidence: Commit pending.
 
 ---
 
