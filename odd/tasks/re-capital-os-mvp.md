@@ -32,15 +32,15 @@ Real estate deals are evaluated manually, informally, and without standardized e
 
 ## 2. Tasks & Progress
 
-- [ ] **TASK-01**: Define canonical Pydantic domain models in `core/schemas.py`
+- [x] **TASK-01**: Define canonical Pydantic domain models in `core/schemas.py`
   - Route: Direct inline
-  - Checks: Models load cleanly, validate valid payloads, reject invalid types.
-  - Evidence: Commit hash pending.
+  - Checks: Models load cleanly, validate valid payloads, reject invalid types (Verified with python execution test).
+  - Evidence: Commit `5674d8f`
 
-- [ ] **TASK-02**: Implement deterministic Financial Underwriting Engine in `core/underwriting.py` and unit tests in `tests/test_underwriting.py`
+- [x] **TASK-02**: Implement deterministic Financial Underwriting Engine in `core/underwriting.py` and unit tests in `tests/test_underwriting.py`
   - Route: Delegated direct (2 non-trivial files: implementation + tests)
-  - Checks: Pytest suite passes verifying IRR, NPV, MOIC, cashflows, and sensitivity calculations.
-  - Evidence: Commit hash pending.
+  - Checks: Pytest suite passes (12 tests passed) verifying IRR, NPV, MOIC, cashflows, scenarios hierarchy, and sensitivity calculations.
+  - Evidence: Commit `503047f`
 
 - [ ] **TASK-03**: Build Investment Memo generator in `core/memo.py`
   - Route: Direct inline
