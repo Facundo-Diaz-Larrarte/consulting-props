@@ -1,7 +1,7 @@
 # Feature: Real Estate Capital OS — Investment Committee & Multi-Agent Consensus
 
 ## Status
-- **State**: In Progress
+- **State**: Completed
 - **Feature Identity**: `re-capital-os-investment-committee`
 - **Engram Mirror**: Pending (Engram tools unavailable in session)
 - **Delivery Strategy**: `ask-on-risk`
@@ -33,22 +33,22 @@ Implement the multi-agent Investment Committee pipeline as specified in Sections
 - [x] **TASK-01**: Implement specialized committee role agents in `core/agents/committee.py`
   - Route: Direct inline
   - Checks: Agents instantiate, evaluate opportunities against mandates, and return structured evaluations (Verified).
-  - Evidence: Commit pending.
+  - Evidence: Commit `dd69259`
 
 - [x] **TASK-02**: Implement `InvestmentCommitteeCoordinator` in `core/agents/coordinator.py`
   - Route: Direct inline
   - Checks: Consensus engine renders verdicts (`APPROVED`, `REJECTED`, `COUNTER_OFFER`) and attaches risk-adjusted recommendations (Verified).
-  - Evidence: Commit pending.
+  - Evidence: Commit `dd69259`
 
 - [x] **TASK-03**: Create unit test suite in `tests/test_committee.py`
   - Route: Direct inline
   - Checks: Pytest verifies approved deals, rejected deals (high risk / low IRR), and price recalculation for counter-offers (4/4 tests passed).
-  - Evidence: Commit pending.
+  - Evidence: Commit `dd69259`
 
 - [x] **TASK-04**: Build multi-deal simulation runner in `scripts/run_committee_simulation.py`
   - Route: Direct inline
   - Checks: Script runs 3 Córdoba deals through the committee and ranks them by risk-adjusted return (Verified with execution output).
-  - Evidence: Commit pending.
+  - Evidence: Commit `dd69259`
 
 ---
 
