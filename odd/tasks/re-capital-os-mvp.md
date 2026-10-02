@@ -1,7 +1,7 @@
 # Feature: Real Estate Capital OS — MVP Core & Financial Engine
 
 ## Status
-- **State**: In Progress
+- **State**: Completed
 - **Feature Identity**: `re-capital-os-mvp`
 - **Engram Mirror**: Pending (Engram tools unavailable in session)
 - **Delivery Strategy**: `ask-on-risk`
@@ -55,7 +55,7 @@ Real estate deals are evaluated manually, informally, and without standardized e
 - [x] **TASK-05**: End-to-end validation script with a realistic Córdoba pilot deal in `scripts/run_pilot_deal.py`
   - Route: Direct inline
   - Checks: Script executes end-to-end: Mandate + Opportunity -> Underwriting -> Memo -> Pipeline status check (Verified with run_pilot_deal.py execution).
-  - Evidence: Commit pending.
+  - Evidence: Commit `3fc5967`
 
 ---
 
