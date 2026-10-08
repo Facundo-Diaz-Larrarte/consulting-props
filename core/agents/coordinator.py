@@ -20,7 +20,7 @@ from core.agents.committee import (
     UnderwritingEvaluation,
 )
 from core.memo import generate_investment_memo
-from core.schemas import InvestmentMemo, InvestorMandate, Opportunity
+from core.schemas import DealStage, InvestmentMemo, InvestorMandate, Opportunity
 from core.underwriting import run_underwriting
 
 
@@ -89,6 +89,7 @@ class InvestmentCommitteeCoordinator:
         # Case B: Approved (Hard match and risk acceptable)
         elif match_eval.is_hard_match and risk_eval.is_acceptable_risk:
             verdict = CommitteeVerdictType.APPROVED
+            opportunity.status = DealStage.APPROVED
             rationale = (
                 f"Aprobado por el Comité. TIR base ({uw_eval.irr_annualized:.1%}) supera el objetivo ({mandate.target_irr:.1%}) "
                 f"con score de riesgo aceptable ({risk_eval.risk_score:.0f}/100)."
@@ -111,7 +112,7 @@ class InvestmentCommitteeCoordinator:
                 f"Precio máximo de compra sugerido: ${max_bid:,.0f} USD."
             )
             # Generate memo adjusted to the counter-offer
-            adjusted_opp = opportunity.model_copy(update={"projected_purchase_price": max_bid})
+            adjusted_opp = opportunity.model_copy(update={"projected_purchase_price": max_bid, "status": DealStage.NEGOTIATION})
             adjusted_uw = run_underwriting(adjusted_opp, discount_rate_annual=discount_rate_annual)
             memo = generate_investment_memo(
                 opportunity=adjusted_opp,
