@@ -160,7 +160,12 @@ class MatchingAgent:
             reasons.append(f"Capital requerido (${capital_required:,.0f}) SUPERA el capital disponible (${mandate.capital_available:,.0f}).")
 
         # 2. Geography
-        geography_fit = any(geo.lower() in opportunity.location.lower() for geo in mandate.geography)
+        import unicodedata
+        def _strip_accents(s: str) -> str:
+            return "".join(c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn").lower()
+
+        opp_loc_norm = _strip_accents(opportunity.location)
+        geography_fit = any(_strip_accents(geo) in opp_loc_norm for geo in mandate.geography)
         if geography_fit:
             fit_points += 20.0
             reasons.append(f"Ubicación ({opportunity.location}) coincide con mandato ({', '.join(mandate.geography)}).")

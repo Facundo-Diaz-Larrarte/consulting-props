@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import os
 import re
-from typing import Optional
+from typing import Any, Dict, Optional, Union
 from core.schemas import DealStage, Opportunity, StrategyType
 
 
@@ -167,3 +167,45 @@ class PropertyIngestionAgent:
             status=DealStage.NORMALIZED,
             notes=raw_text.strip(),
         )
+
+
+IngestionAgent = PropertyIngestionAgent
+
+
+def normalize_opportunity(data: Union[Dict[str, Any], str, Opportunity]) -> Opportunity:
+    """Normalize raw dict, unstructured text, or Opportunity object into a validated Opportunity."""
+    if isinstance(data, Opportunity):
+        return data
+    if isinstance(data, str):
+        return PropertyIngestionAgent().ingest(data)
+    
+    # Loose or partial dictionary normalization
+    strategy_val = data.get("strategy", StrategyType.RENOVATE_AND_SELL)
+    if isinstance(strategy_val, str):
+        try:
+            strategy_val = StrategyType(strategy_val)
+        except ValueError:
+            strategy_val = StrategyType.RENOVATE_AND_SELL
+
+    asking_price = float(data.get("asking_price") or data.get("price") or 100000.0)
+    purchase_price = float(data.get("projected_purchase_price") or data.get("price") or asking_price * 0.90)
+    capex = float(data.get("estimated_capex") or data.get("capex") or 0.0)
+    holding_period = int(data.get("holding_period_months") or data.get("duration") or 12)
+    exit_value = float(data.get("projected_exit_value") or data.get("exit_value") or (purchase_price + capex) * 1.25)
+    usable_area = float(data["usable_area_m2"]) if data.get("usable_area_m2") else None
+
+    return Opportunity(
+        title=str(data.get("title") or f"Oportunidad en {data.get('location', 'Córdoba')}"),
+        location=str(data.get("location") or "Cordoba, Argentina"),
+        strategy=strategy_val,
+        asking_price=asking_price,
+        projected_purchase_price=purchase_price,
+        estimated_capex=capex,
+        holding_period_months=holding_period,
+        projected_exit_value=exit_value,
+        usable_area_m2=usable_area,
+        monthly_gross_rent=float(data.get("monthly_gross_rent") or 0.0),
+        monthly_operating_expenses=float(data.get("monthly_operating_expenses") or 0.0),
+        status=DealStage.NORMALIZED,
+        notes=str(data.get("notes") or ""),
+    )
