@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.codegraph/
+*.egg-info/
+dist/
+build/
+.env
+# Local Pi runtime state
+.atl/
