@@ -35,10 +35,10 @@ Implement the local market data validation tool using official Córdoba land and
   - Checks: Opportunity supports `usable_area_m2`. Downside scenario adapts capex, duration, vacancy, and exit based on `StrategyType`.
   - Evidence: Verified with 24 passing pytest unit tests.
 
-- [ ] **TASK-03**: Create IDECOR Market Benchmark Tool in `core/tools/idecor.py`
+- [x] **TASK-03**: Create IDECOR Market Benchmark Tool in `core/tools/idecor.py`
   - Route: Direct inline
   - Checks: Audits target price per m² against official Córdoba neighborhood ranges (Nueva Córdoba, General Paz, Güemes, etc.).
-  - Evidence: Commit hash pending.
+  - Evidence: Implemented in core/tools/idecor.py with neighborhood resolution and MarketValuationAudit.
 
 - [ ] **TASK-04**: Integrate market audit into LangGraph Committee and verify with unit tests in `tests/test_market_validation.py`
   - Route: Direct inline
