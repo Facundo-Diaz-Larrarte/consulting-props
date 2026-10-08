@@ -50,6 +50,7 @@ class DealStage(str, Enum):
     DEAL = "deal"
     CLOSED = "closed"
     EXIT = "exit"
+    REJECTED = "rejected"
 
 
 # Object 1: Investor Mandate
@@ -186,8 +187,10 @@ class InvestmentMemo(BaseModel):
 class PipelineEvent(BaseModel):
     from_stage: DealStage
     to_stage: DealStage
+    actor: str = "system"
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     reason: Optional[str] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
 class DealPipelineItem(BaseModel):
@@ -199,12 +202,20 @@ class DealPipelineItem(BaseModel):
     history: List[PipelineEvent] = Field(default_factory=list)
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    def transition_to(self, new_stage: DealStage, reason: Optional[str] = None) -> None:
+    def transition_to(
+        self,
+        new_stage: DealStage,
+        reason: Optional[str] = None,
+        actor: str = "system",
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> None:
         """Record stage transition in history."""
         event = PipelineEvent(
             from_stage=self.current_stage,
             to_stage=new_stage,
-            reason=reason
+            actor=actor,
+            reason=reason,
+            metadata=metadata or {},
         )
         self.history.append(event)
         self.current_stage = new_stage

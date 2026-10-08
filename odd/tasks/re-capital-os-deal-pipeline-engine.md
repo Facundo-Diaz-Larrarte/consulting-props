@@ -1,7 +1,7 @@
 # Feature: Real Estate Capital OS — Deal Pipeline Engine (Section 20 & 43)
 
 ## Status
-- **State**: In Progress
+- **State**: Completed
 - **Feature Identity**: `re-capital-os-deal-pipeline-engine`
 - **Delivery Strategy**: `ask-on-risk`
 - **TDD Mode**: Disabled (verification via automated functional test suites with pytest)
@@ -29,25 +29,25 @@ The engine coordinates the lifecycle stages of an opportunity:
 
 ## 2. Tasks & Progress
 
-- [ ] **TASK-01**: Initialize ODD task document and define state transition rules for Section 20
+- [x] **TASK-01**: Initialize ODD task document and define state transition rules for Section 20
   - Route: Direct inline
   - Checks: Validates allowed stage transitions and institutional gates.
-  - Evidence: Commit pending.
+  - Evidence: Committed in fbba3b1.
 
-- [ ] **TASK-02**: Implement `DealPipelineEngine` and `InvalidTransitionError` in `core/pipeline.py`
+- [x] **TASK-02**: Implement `DealPipelineEngine` and `InvalidTransitionError` in `core/pipeline.py`
   - Route: Direct inline
   - Checks: Strict validation of allowed transitions and precondition checks.
-  - Evidence: Commit pending.
+  - Evidence: Implemented in core/pipeline.py and core/schemas.py.
 
-- [ ] **TASK-03**: Implement automated lifecycle runner connecting all Core engines
+- [x] **TASK-03**: Implement automated lifecycle runner connecting all Core engines
   - Route: Direct inline
   - Checks: Integrates Ingestion, IDECOR Tool, Underwriting Engine, and Committee.
-  - Evidence: Commit pending.
+  - Evidence: Implemented in DealPipelineOrchestrator in core/pipeline.py.
 
-- [ ] **TASK-04**: Implement test suite in `tests/test_pipeline.py` and run full pytest suite
+- [x] **TASK-04**: Implement test suite in `tests/test_pipeline.py` and run full pytest suite
   - Route: Direct inline
   - Checks: 100% passing tests for pipeline state transitions, validations, and end-to-end execution.
-  - Evidence: Commit pending.
+  - Evidence: 40/40 tests passing across full pytest suite.
 
 ---
 
