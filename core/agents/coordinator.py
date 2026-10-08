@@ -74,9 +74,9 @@ class InvestmentCommitteeCoordinator:
 
         # 4. Consensus & Decision Logic
         # Case A: Fatal mismatch or catastrophic risk -> REJECTED
-        if not match_eval.capital_fit or not match_eval.geography_fit or not match_eval.strategy_fit:
+        if not match_eval.capital_fit or not match_eval.geography_fit or not match_eval.strategy_fit or not match_eval.horizon_fit:
             verdict = CommitteeVerdictType.REJECTED
-            rationale = "Rechazado por incompatibilidad estructural con el mandato (monto, geografía o estrategia)."
+            rationale = "Rechazado por incompatibilidad estructural con el mandato (monto, geografía, estrategia o plazo/horizonte)."
             memo = None
             max_bid = None
 

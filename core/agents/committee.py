@@ -49,6 +49,7 @@ class MatchEvaluation(BaseModel):
     capital_fit: bool
     geography_fit: bool
     strategy_fit: bool
+    horizon_fit: bool
     return_fit: bool
     fit_score: float = Field(..., ge=0, le=100)
     reasons: List[str] = Field(default_factory=list)
@@ -138,7 +139,7 @@ class MatchingAgent:
         capital_required = opportunity.total_capital_required
         capital_fit = capital_required <= mandate.capital_available
         if capital_fit:
-            fit_points += 25.0
+            fit_points += 20.0
             reasons.append(f"Capital requerido (${capital_required:,.0f}) encaja dentro del disponible (${mandate.capital_available:,.0f}).")
         else:
             reasons.append(f"Capital requerido (${capital_required:,.0f}) SUPERA el capital disponible (${mandate.capital_available:,.0f}).")
@@ -146,7 +147,7 @@ class MatchingAgent:
         # 2. Geography
         geography_fit = any(geo.lower() in opportunity.location.lower() for geo in mandate.geography)
         if geography_fit:
-            fit_points += 25.0
+            fit_points += 20.0
             reasons.append(f"Ubicación ({opportunity.location}) coincide con mandato ({', '.join(mandate.geography)}).")
         else:
             reasons.append(f"Ubicación ({opportunity.location}) fuera de geografía objetivo ({', '.join(mandate.geography)}).")
@@ -154,20 +155,28 @@ class MatchingAgent:
         # 3. Strategy
         strategy_fit = opportunity.strategy in mandate.strategies
         if strategy_fit:
-            fit_points += 25.0
+            fit_points += 20.0
             reasons.append(f"Estrategia ({opportunity.strategy.value}) autorizada en mandato.")
         else:
             reasons.append(f"Estrategia ({opportunity.strategy.value}) NO contemplada en mandato.")
 
-        # 4. Return hurdle
+        # 4. Investment Horizon
+        horizon_fit = opportunity.holding_period_months <= mandate.investment_horizon_months
+        if horizon_fit:
+            fit_points += 20.0
+            reasons.append(f"Plazo ({opportunity.holding_period_months}m) dentro del horizonte del inversor ({mandate.investment_horizon_months}m).")
+        else:
+            reasons.append(f"Plazo ({opportunity.holding_period_months}m) EXCEDE el horizonte del inversor ({mandate.investment_horizon_months}m).")
+
+        # 5. Return hurdle
         return_fit = uw.irr_annualized >= mandate.target_irr
         if return_fit:
-            fit_points += 25.0
+            fit_points += 20.0
             reasons.append(f"TIR proyectada ({uw.irr_annualized:.1%}) supera umbral objetivo ({mandate.target_irr:.1%}).")
         else:
             reasons.append(f"TIR proyectada ({uw.irr_annualized:.1%}) por debajo del objetivo ({mandate.target_irr:.1%}).")
 
-        is_hard_match = capital_fit and geography_fit and strategy_fit and return_fit
+        is_hard_match = capital_fit and geography_fit and strategy_fit and horizon_fit and return_fit
 
         return MatchEvaluation(
             opportunity_id=opportunity.id,
@@ -176,6 +185,7 @@ class MatchingAgent:
             capital_fit=capital_fit,
             geography_fit=geography_fit,
             strategy_fit=strategy_fit,
+            horizon_fit=horizon_fit,
             return_fit=return_fit,
             fit_score=fit_points,
             reasons=reasons,

@@ -66,6 +66,27 @@ def test_committee_rejects_structural_mismatch(cordoba_mandate):
     assert "incompatibilidad estructural" in verdict.rationale
 
 
+def test_committee_rejects_horizon_mismatch(cordoba_mandate):
+    # Deal has matching location and strategy, but duration exceeds investor horizon (24m vs 18m)
+    long_opp = Opportunity(
+        title="Casona Lenta",
+        location="Nueva Cordoba, Cordoba",
+        strategy=StrategyType.RENOVATE_AND_SELL,
+        asking_price=120000.0,
+        projected_purchase_price=100000.0,
+        estimated_capex=20000.0,
+        holding_period_months=24,  # Mandate horizon is 18m
+        projected_exit_value=170000.0,
+    )
+    coordinator = InvestmentCommitteeCoordinator()
+    verdict = coordinator.evaluate_deal(long_opp, cordoba_mandate)
+
+    assert verdict.verdict == CommitteeVerdictType.REJECTED
+    assert verdict.match.horizon_fit is False
+    assert verdict.match.is_hard_match is False
+    assert "incompatibilidad estructural" in verdict.rationale
+
+
 def test_committee_counter_offers_overpriced_deal(cordoba_mandate):
     # Deal has good location/strategy, but asking price is too high to reach 18% IRR
     overpriced_opp = Opportunity(
