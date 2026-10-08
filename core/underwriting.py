@@ -17,6 +17,7 @@ from core.schemas import (
     Opportunity,
     ScenarioMetrics,
     SensitivityPoint,
+    StrategyType,
     UnderwritingModel,
 )
 
@@ -33,11 +34,12 @@ def build_cashflows(
     monthly_gross_rent: float = 0.0,
     monthly_operating_expenses: float = 0.0,
     exit_fee_pct: float = DEFAULT_EXIT_TRANSACTION_FEE_PCT,
+    vacancy_months: int = 0,
 ) -> List[float]:
     """Generate month-by-month cashflow schedule.
 
     Month 0: Initial capital deployment (- purchase - closing costs - capex).
-    Months 1 .. (holding_period - 1): Net operating rental cashflow.
+    Months 1 .. (holding_period - 1): Net operating rental cashflow (reflecting vacancy).
     Final Month: Net exit proceeds (after transaction fees) + final month operating cashflow.
     """
     duration = max(1, int(holding_period_months))
@@ -48,11 +50,17 @@ def build_cashflows(
     cashflows[0] = -round(total_capital_required, 2)
 
     net_monthly_operating = round(monthly_gross_rent - monthly_operating_expenses, 2)
-    for m in range(1, duration):
-        cashflows[m] = net_monthly_operating
+    vacant_monthly_operating = -round(monthly_operating_expenses, 2)
 
+    for m in range(1, duration):
+        if m <= vacancy_months:
+            cashflows[m] = vacant_monthly_operating
+        else:
+            cashflows[m] = net_monthly_operating
+
+    final_operating = vacant_monthly_operating if duration <= vacancy_months else net_monthly_operating
     net_exit_proceeds = round(exit_value * (1.0 - exit_fee_pct), 2)
-    cashflows[duration] = round(net_exit_proceeds + net_monthly_operating, 2)
+    cashflows[duration] = round(net_exit_proceeds + final_operating, 2)
 
     return cashflows
 
@@ -129,6 +137,7 @@ def calculate_scenario(
     monthly_operating_expenses: float = 0.0,
     discount_rate_annual: float = DEFAULT_DISCOUNT_RATE_ANNUAL,
     exit_fee_pct: float = DEFAULT_EXIT_TRANSACTION_FEE_PCT,
+    vacancy_months: int = 0,
 ) -> ScenarioMetrics:
     """Compute financial metrics for a specific scenario."""
     cashflows = build_cashflows(
@@ -140,6 +149,7 @@ def calculate_scenario(
         monthly_gross_rent=monthly_gross_rent,
         monthly_operating_expenses=monthly_operating_expenses,
         exit_fee_pct=exit_fee_pct,
+        vacancy_months=vacancy_months,
     )
     metrics = calculate_metrics(cashflows, discount_rate_annual=discount_rate_annual)
 
@@ -153,6 +163,71 @@ def calculate_scenario(
         moic=metrics["moic"],
         roi=metrics["roi"],
     )
+
+
+def get_downside_stress_parameters(strategy: StrategyType) -> Dict[str, float]:
+    """Return strategy-specific downside stress multipliers and deltas.
+
+    Implements Section 2 of docs/MARKET_VALIDATION_AND_DOWNSIDE.md:
+    - renovate_and_sell / reposition_and_sell: capex +25%, duration +4m, exit -12%
+    - buy_and_hold: capex +10%, duration +0m, exit -10%, 3m vacancy, -15% rent
+    - pre_construction: capex +0%, duration +8m, exit -10%
+    - distressed: capex +35%, duration +12m, exit -15%
+    - development / construction_financing / developer_capital: capex +25%, duration +6m, exit -15%
+    - default / others: capex +20%, duration +4m, exit -12%
+    """
+    if strategy in (StrategyType.RENOVATE_AND_SELL, StrategyType.REPOSITION_AND_SELL):
+        return {
+            "capex_multiplier": 1.25,
+            "duration_delta_months": 4.0,
+            "exit_price_multiplier": 0.88,
+            "vacancy_months": 0.0,
+            "rent_multiplier": 1.0,
+        }
+    elif strategy == StrategyType.BUY_AND_HOLD:
+        return {
+            "capex_multiplier": 1.10,
+            "duration_delta_months": 0.0,
+            "exit_price_multiplier": 0.90,
+            "vacancy_months": 3.0,
+            "rent_multiplier": 0.85,
+        }
+    elif strategy == StrategyType.PRE_CONSTRUCTION:
+        return {
+            "capex_multiplier": 1.00,
+            "duration_delta_months": 8.0,
+            "exit_price_multiplier": 0.90,
+            "vacancy_months": 0.0,
+            "rent_multiplier": 1.0,
+        }
+    elif strategy == StrategyType.DISTRESSED:
+        return {
+            "capex_multiplier": 1.35,
+            "duration_delta_months": 12.0,
+            "exit_price_multiplier": 0.85,
+            "vacancy_months": 0.0,
+            "rent_multiplier": 1.0,
+        }
+    elif strategy in (
+        StrategyType.DEVELOPMENT,
+        StrategyType.CONSTRUCTION_FINANCING,
+        StrategyType.DEVELOPER_CAPITAL,
+    ):
+        return {
+            "capex_multiplier": 1.25,
+            "duration_delta_months": 6.0,
+            "exit_price_multiplier": 0.85,
+            "vacancy_months": 0.0,
+            "rent_multiplier": 1.0,
+        }
+    else:
+        return {
+            "capex_multiplier": 1.20,
+            "duration_delta_months": 4.0,
+            "exit_price_multiplier": 0.88,
+            "vacancy_months": 0.0,
+            "rent_multiplier": 1.0,
+        }
 
 
 def generate_sensitivity_matrix(
@@ -229,18 +304,20 @@ def run_underwriting(
         roi=base_metrics["roi"],
     )
 
-    # 2. Downside Scenario: exit * 0.85, capex * 1.20, duration + 3
+    # 2. Downside Scenario (Dynamic Strategy-Specific Stress Matrix)
+    stress = get_downside_stress_parameters(opportunity.strategy)
     downside_scenario = calculate_scenario(
         scenario_name="Downside",
         purchase_price=opportunity.projected_purchase_price,
         closing_costs_pct=opportunity.closing_costs_pct,
-        capex=opportunity.estimated_capex * 1.20,
-        holding_period_months=opportunity.holding_period_months + 3,
-        exit_value=opportunity.projected_exit_value * 0.85,
-        monthly_gross_rent=opportunity.monthly_gross_rent,
+        capex=opportunity.estimated_capex * stress["capex_multiplier"],
+        holding_period_months=opportunity.holding_period_months + int(stress["duration_delta_months"]),
+        exit_value=opportunity.projected_exit_value * stress["exit_price_multiplier"],
+        monthly_gross_rent=opportunity.monthly_gross_rent * stress["rent_multiplier"],
         monthly_operating_expenses=opportunity.monthly_operating_expenses,
         discount_rate_annual=discount_rate_annual,
         exit_fee_pct=exit_fee_pct,
+        vacancy_months=int(stress["vacancy_months"]),
     )
 
     # 3. Upside Scenario: exit * 1.10, capex * 0.95, duration max(1, duration - 1)

@@ -30,10 +30,10 @@ Implement the local market data validation tool using official Córdoba land and
   - Checks: Documents IDECOR data model and strategy-specific downside stress matrices.
   - Evidence: Completed in docs/MARKET_VALIDATION_AND_DOWNSIDE.md.
 
-- [ ] **TASK-02**: Implement strategy-specific dynamic downside in `core/underwriting.py` and update `core/schemas.py`
+- [x] **TASK-02**: Implement strategy-specific dynamic downside in `core/underwriting.py` and update `core/schemas.py`
   - Route: Direct inline
-  - Checks: Opportunity supports `usable_area_m2`. Downside scenario adapts capex, duration, and exit based on `StrategyType`.
-  - Evidence: Commit hash pending.
+  - Checks: Opportunity supports `usable_area_m2`. Downside scenario adapts capex, duration, vacancy, and exit based on `StrategyType`.
+  - Evidence: Verified with 24 passing pytest unit tests.
 
 - [ ] **TASK-03**: Create IDECOR Market Benchmark Tool in `core/tools/idecor.py`
   - Route: Direct inline
