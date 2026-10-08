@@ -25,6 +25,9 @@ from core.schemas import (
 from core.underwriting import run_underwriting
 
 
+from core.tools.idecor import audit_property_valuation
+
+
 class CommitteeState(TypedDict):
     """Shared state dictionary representing the deal context across graph nodes."""
     opportunity: Dict[str, Any]
@@ -34,6 +37,7 @@ class CommitteeState(TypedDict):
     underwriter_critique: Optional[str]
     risk_score: Optional[float]
     risk_critique: Optional[str]
+    market_audit: Optional[Dict[str, Any]]
     verdict: Optional[str]
     rationale: Optional[str]
     max_recommended_bid: Optional[float]
@@ -93,21 +97,41 @@ def risk_node(state: CommitteeState) -> Dict[str, Any]:
         flags.append(f"Plazo prolongado ({opp.holding_period_months} meses)")
         score -= 15.0
 
+    # Market Valuation Audit (IDECOR / OMI)
+    market_audit = audit_property_valuation(opp)
+    if not market_audit.is_exit_realistic:
+        flags.append(f"Salida sobrevaluada vs IDECOR ({market_audit.neighborhood})")
+        score -= 25.0
+    elif market_audit.is_below_market_entry:
+        score = min(100.0, score + 5.0)
+
+    for warning in market_audit.warnings:
+        if warning not in flags:
+            flags.append(warning)
+
     score = max(0.0, min(100.0, score))
+
+    market_summary = (
+        f"Auditoría IDECOR ({market_audit.neighborhood}): Compra "
+        f"${market_audit.purchase_price_per_m2 or 'N/A'}/m², Salida ${market_audit.exit_price_per_m2 or 'N/A'}/m² "
+        f"(Mediana OMI: ${market_audit.benchmark_median_usd_m2:,.0f}/m²). "
+    )
 
     critique = (
         f"[Oficial de Riesgo]: Score asignado: {score:.0f}/100. "
+        f"{market_summary}"
         f"Alertas de riesgo: {', '.join(flags) if flags else 'Dentro de parámetros normales'}. "
         f"TIR en estrés: {downside_irr:.1%}. "
         f"Intensidad de obra: {capex_ratio:.1%} sobre precio de adquisición."
     )
 
     trail = list(state.get("audit_trail", []))
-    trail.append("Risk Officer stress-tested execution and downside.")
+    trail.append(f"Risk Officer stress-tested execution and audited IDECOR valuation ({market_audit.neighborhood}).")
 
     return {
         "risk_score": score,
         "risk_critique": critique,
+        "market_audit": market_audit.model_dump(),
         "audit_trail": trail,
     }
 
@@ -173,6 +197,7 @@ def run_langgraph_committee(
         "underwriter_critique": None,
         "risk_score": None,
         "risk_critique": None,
+        "market_audit": None,
         "verdict": None,
         "rationale": None,
         "max_recommended_bid": None,

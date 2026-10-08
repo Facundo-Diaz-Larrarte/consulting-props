@@ -80,9 +80,9 @@ class InvestmentCommitteeCoordinator:
             memo = None
             max_bid = None
 
-        elif not risk_eval.is_acceptable_risk and risk_eval.downside_profit < 0:
+        elif uw_eval.net_profit <= 0:
             verdict = CommitteeVerdictType.REJECTED
-            rationale = "Rechazado por riesgo inaceptable: el escenario adverso destruye capital."
+            rationale = "Rechazado por inviabilidad económica: la inversión no genera rentabilidad neta positiva en escenario base."
             memo = None
             max_bid = None
 

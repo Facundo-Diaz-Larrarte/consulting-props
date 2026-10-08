@@ -1,7 +1,7 @@
 # Feature: Real Estate Capital OS — Market Validation (IDECOR) & Dynamic Downside
 
 ## Status
-- **State**: In Progress
+- **State**: Completed
 - **Feature Identity**: `re-capital-os-market-validation-and-downside`
 - **Engram Mirror**: Pending (Engram tools unavailable in session)
 - **Delivery Strategy**: `ask-on-risk`
@@ -40,10 +40,10 @@ Implement the local market data validation tool using official Córdoba land and
   - Checks: Audits target price per m² against official Córdoba neighborhood ranges (Nueva Córdoba, General Paz, Güemes, etc.).
   - Evidence: Implemented in core/tools/idecor.py with neighborhood resolution and MarketValuationAudit.
 
-- [ ] **TASK-04**: Integrate market audit into LangGraph Committee and verify with unit tests in `tests/test_market_validation.py`
+- [x] **TASK-04**: Integrate market audit into LangGraph Committee and verify with unit tests in `tests/test_market_validation.py`
   - Route: Direct inline
   - Checks: All unit tests pass verifying dynamic downside and IDECOR benchmark checks.
-  - Evidence: Commit hash pending.
+  - Evidence: Verified with 31/31 passing pytest tests across full suite.
 
 ---
 

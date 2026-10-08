@@ -30,6 +30,9 @@ class UnderwritingEvaluation(BaseModel):
     underwriting_model: UnderwritingModel
 
 
+from core.tools.idecor import MarketValuationAudit, audit_property_valuation
+
+
 class RiskEvaluation(BaseModel):
     """Output report from the Risk Agent."""
     opportunity_id: str
@@ -39,6 +42,7 @@ class RiskEvaluation(BaseModel):
     capex_intensity_pct: float
     risk_flags: List[str] = Field(default_factory=list)
     is_acceptable_risk: bool
+    market_audit: Optional[MarketValuationAudit] = None
 
 
 class MatchEvaluation(BaseModel):
@@ -77,7 +81,7 @@ class RiskAgent:
         flags = []
         score = 100.0
 
-        downside = uw.underwriting_model.scenarios.get("downside")
+        downside = uw.underwriting_model.scenarios.get("Downside") or uw.underwriting_model.scenarios.get("downside")
         downside_irr = downside.irr_annualized if downside else 0.0
         downside_profit = downside.net_profit if downside else 0.0
 
@@ -106,6 +110,16 @@ class RiskAgent:
             flags.append(f"MODERATE: Plazo extendido ({opportunity.holding_period_months} meses).")
             score -= 10.0
 
+        # 4. Local Market Benchmark Audit (IDECOR / OMI)
+        market_audit = audit_property_valuation(opportunity)
+        if not market_audit.is_exit_realistic:
+            warning_msg = market_audit.warnings[0] if market_audit.warnings else "Salida proyectada fuera de mercado"
+            flags.append(f"HIGH: Salida sobrevaluada vs IDECOR ({market_audit.neighborhood}). {warning_msg}")
+            score -= 25.0
+        elif market_audit.is_below_market_entry:
+            # Entry discount upside bonus
+            score = min(100.0, score + 5.0)
+
         score = max(0.0, min(100.0, score))
 
         # Acceptability based on investor risk tolerance
@@ -115,7 +129,7 @@ class RiskAgent:
             RiskTolerance.HIGH: 45.0,
         }.get(risk_tolerance, 60.0)
 
-        is_acceptable = score >= min_acceptable_score and downside_profit >= 0
+        is_acceptable = score >= min_acceptable_score and downside_profit >= 0 and market_audit.is_exit_realistic
 
         return RiskEvaluation(
             opportunity_id=opportunity.id,
@@ -125,6 +139,7 @@ class RiskAgent:
             capex_intensity_pct=capex_ratio,
             risk_flags=flags,
             is_acceptable_risk=is_acceptable,
+            market_audit=market_audit,
         )
 
 
