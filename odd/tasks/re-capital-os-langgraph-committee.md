@@ -1,7 +1,7 @@
 # Feature: Real Estate Capital OS — LangGraph Multi-Agent Committee
 
 ## Status
-- **State**: In Progress
+- **State**: Completed
 - **Feature Identity**: `re-capital-os-langgraph-committee`
 - **Engram Mirror**: Pending (Engram tools unavailable in session)
 - **Delivery Strategy**: `ask-on-risk`
@@ -28,17 +28,17 @@ Integrate the industry-standard **LangGraph** framework to power the multi-agent
 - [x] **TASK-01**: Implement LangGraph StateGraph in `core/agents/langgraph_committee.py`
   - Route: Direct inline
   - Checks: StateGraph compiles, connects nodes with conditional routing, and supports LLM reasoning with tool integration (Verified).
-  - Evidence: Commit pending.
+  - Evidence: Commit `cc0c049`
 
 - [x] **TASK-02**: Implement test suite in `tests/test_langgraph_committee.py`
   - Route: Direct inline
   - Checks: Pytest verifies graph compilation, state accumulation across nodes, and correct verdict outputs (3/3 tests passed, 22 total passed).
-  - Evidence: Commit pending.
+  - Evidence: Commit `cc0c049`
 
 - [x] **TASK-03**: Build execution simulation script in `scripts/run_langgraph_committee.py`
   - Route: Direct inline
   - Checks: Script runs end-to-end deliberation through LangGraph showing multi-agent reasoning stream (Verified with execution output).
-  - Evidence: Commit pending.
+  - Evidence: Commit `cc0c049`
 
 ---
 
