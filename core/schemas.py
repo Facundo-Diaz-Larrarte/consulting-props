@@ -88,6 +88,7 @@ class Opportunity(BaseModel):
     closing_costs_pct: float = Field(default=0.06, ge=0, le=0.25, description="Notary, legal, stamps, commissions (e.g. 0.06 = 6%)")
     holding_period_months: int = Field(..., gt=0, description="Total estimated duration in months")
     projected_exit_value: float = Field(..., gt=0)
+    usable_area_m2: Optional[float] = Field(default=None, gt=0, description="Covered or usable area in square meters")
     monthly_gross_rent: float = Field(default=0.0, ge=0)
     monthly_operating_expenses: float = Field(default=0.0, ge=0)
     status: DealStage = DealStage.RAW
@@ -103,6 +104,20 @@ class Opportunity(BaseModel):
     def total_capital_required(self) -> float:
         """Total capital deployment: Initial cost + Capex."""
         return self.total_initial_cost + self.estimated_capex
+
+    @property
+    def purchase_price_per_m2(self) -> Optional[float]:
+        """Projected purchase price per square meter."""
+        if self.usable_area_m2 and self.usable_area_m2 > 0:
+            return round(self.projected_purchase_price / self.usable_area_m2, 2)
+        return None
+
+    @property
+    def exit_price_per_m2(self) -> Optional[float]:
+        """Projected exit value per square meter."""
+        if self.usable_area_m2 and self.usable_area_m2 > 0:
+            return round(self.projected_exit_value / self.usable_area_m2, 2)
+        return None
 
 
 # Object 3: Underwriting Model

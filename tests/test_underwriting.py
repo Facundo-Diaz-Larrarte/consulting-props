@@ -171,16 +171,31 @@ class TestScenarioRelations:
         downside = model.scenarios["Downside"]
         upside = model.scenarios["Upside"]
 
-        # Exit values: Downside = 85%, Base = 100%, Upside = 110%
-        assert downside.exit_value == pytest.approx(sample_renovate_deal.projected_exit_value * 0.85, abs=0.01)
+        # Renovate & sell stress matrix: Downside = 88% exit, Base = 100%, Upside = 110%
+        assert downside.exit_value == pytest.approx(sample_renovate_deal.projected_exit_value * 0.88, abs=0.01)
         assert base.exit_value == pytest.approx(sample_renovate_deal.projected_exit_value, abs=0.01)
         assert upside.exit_value == pytest.approx(sample_renovate_deal.projected_exit_value * 1.10, abs=0.01)
 
-        # Capital invested: Downside has 20% higher capex, Upside has 5% lower capex
+        # Capital invested: Downside has +25% capex for renovate & sell, Upside has -5% capex
         initial_cost = sample_renovate_deal.projected_purchase_price * (1.0 + sample_renovate_deal.closing_costs_pct)
-        assert downside.total_capital_invested == pytest.approx(initial_cost + sample_renovate_deal.estimated_capex * 1.20, abs=0.01)
+        assert downside.total_capital_invested == pytest.approx(initial_cost + sample_renovate_deal.estimated_capex * 1.25, abs=0.01)
         assert base.total_capital_invested == pytest.approx(initial_cost + sample_renovate_deal.estimated_capex, abs=0.01)
         assert upside.total_capital_invested == pytest.approx(initial_cost + sample_renovate_deal.estimated_capex * 0.95, abs=0.01)
+
+    def test_buy_and_hold_downside_stress(self, sample_rental_deal: Opportunity):
+        model = run_underwriting(sample_rental_deal)
+
+        base = model.scenarios["Base"]
+        downside = model.scenarios["Downside"]
+
+        # Buy & Hold stress: 90% exit, +10% capex, vacancy & rent drop
+        assert downside.exit_value == pytest.approx(sample_rental_deal.projected_exit_value * 0.90, abs=0.01)
+        initial_cost = sample_rental_deal.projected_purchase_price * (1.0 + sample_rental_deal.closing_costs_pct)
+        # Total capital deployed includes initial cost + stressed capex + operational shortfall during 3 months vacancy
+        expected_capital = initial_cost + sample_rental_deal.estimated_capex * 1.10 + 3 * sample_rental_deal.monthly_operating_expenses
+        assert downside.total_capital_invested == pytest.approx(expected_capital, abs=0.01)
+        # Downside net profit must be significantly lower due to vacancy and rent discount
+        assert downside.net_profit < base.net_profit
 
 
 class TestSensitivityMatrix:
