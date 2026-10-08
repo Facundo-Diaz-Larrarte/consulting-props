@@ -1,7 +1,7 @@
 # Feature: Real Estate Capital OS — Monetization Engine & Unit Economics (Sections 21 & 22)
 
 ## Status
-- **State**: In Progress
+- **State**: Completed
 - **Feature Identity**: `re-capital-os-monetization-and-unit-economics`
 - **Delivery Strategy**: `ask-on-risk`
 - **TDD Mode**: Disabled (verification via automated functional test suites with pytest)
@@ -27,23 +27,23 @@ Institutional real estate syndication requires transparently decoupling:
   - Checks: Formalizes fee schedule, hurdle rate waterfall logic, and unit economics formulas.
   - Evidence: Documented in docs/MONETIZATION_AND_UNIT_ECONOMICS.md.
 
-- [ ] **TASK-02**: Implement `FeeSchedule` and Hurdle Rate Waterfall distribution in `core/monetization.py`
+- [x] **TASK-02**: Implement `FeeSchedule` and Hurdle Rate Waterfall distribution in `core/monetization.py`
   - Route: Direct inline
   - Checks: Calculates origination fee, structuring fee, success fee, and carry over hurdle rate.
-  - Evidence: Commit pending.
+  - Evidence: Implemented in `core/monetization.py` (`FeeScheduleConfig`, `FeeBreakdown`, `calculate_deal_monetization`).
 
-- [ ] **TASK-03**: Implement Net Investor Return and Platform Economics calculations
+- [x] **TASK-03**: Implement Net Investor Return and Platform Economics calculations
   - Route: Direct inline
   - Checks: Net cashflows, Net IRR/MOIC/NPV, GMV, effective take rate, and contribution margin.
-  - Evidence: Commit pending.
+  - Evidence: Implemented in `core/monetization.py` (`NetInvestorMetrics`, `PlatformUnitEconomics`).
 
-- [ ] **TASK-04**: Integrate monetization breakdown into Investment Memo and verify with unit tests in `tests/test_monetization.py`
+- [x] **TASK-04**: Integrate monetization breakdown into Investment Memo and verify with unit tests in `tests/test_monetization.py`
   - Route: Direct inline
   - Checks: All unit tests pass verifying fee calculation, net metrics, and memo generation.
-  - Evidence: Commit pending.
+  - Evidence: Integrated in `core/memo.py` (Section 6) and verified in `tests/test_monetization.py` (6 unit tests, 46/46 pytest suite passing).
 
 ---
 
 ## 3. Verification & Evidence
-- Tests: `pytest`
-- Syntax: `python -m py_compile`
+- Tests: `pytest` (46 passed in 1.41s)
+- Syntax: `python -m py_compile core/monetization.py core/memo.py tests/test_monetization.py`

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import List, Optional
 from core.schemas import InvestmentMemo, Opportunity, UnderwritingModel
+from core.monetization import DealMonetization, calculate_deal_monetization
 
 
 def generate_investment_memo(
@@ -16,6 +17,7 @@ def generate_investment_memo(
     thesis: Optional[str] = None,
     key_risks: Optional[List[str]] = None,
     exit_strategy: Optional[str] = None,
+    monetization: Optional[DealMonetization] = None,
 ) -> InvestmentMemo:
     """Build a structured and human-readable Investment Memo from an Opportunity and UnderwritingModel."""
     
@@ -91,16 +93,29 @@ def generate_investment_memo(
             f"| **{sc_name.capitalize()}** | ${sc.exit_value:,.0f} | ${sc.total_capital_invested:,.0f} | ${sc.net_profit:,.0f} | {sc.irr_annualized:.1%} | {sc.moic:.2f}x |"
         )
 
+    mon = monetization or calculate_deal_monetization(opportunity, underwriting)
+
     md_lines.extend([
         "",
-        "## 6. Key Risks & Mitigants",
+        "## 6. Platform Fees & Net Investor Yield (Sections 21 & 22)",
+        "| Fee / Metric | Amount / Rate | Timing |",
+        "| :--- | :--- | :--- |",
+        f"| Origination Fee | ${mon.fee_breakdown.origination_fee:,.0f} | Entry |",
+        f"| Structuring Fee | ${mon.fee_breakdown.structuring_fee:,.0f} | Entry |",
+        f"| Success Fee | ${mon.fee_breakdown.success_fee:,.0f} | Exit |",
+        f"| Performance Fee (Carry) | ${mon.fee_breakdown.performance_fee:,.0f} | Exit (Hurdle {mon.hurdle_rate_annual:.1%}) |",
+        f"| **Total Platform Revenue** | **${mon.fee_breakdown.total_platform_revenue:,.0f}** | Effective Take Rate: {mon.unit_economics.effective_take_rate:.2%} |",
+        f"| **Investor Net IRR** | **{mon.net_investor_metrics.net_irr_annualized:.1%}** | Net of all platform fees |",
+        f"| **Investor Net MOIC** | **{mon.net_investor_metrics.net_moic:.2f}x** | Net equity multiple |",
+        "",
+        "## 7. Key Risks & Mitigants",
     ])
     for risk in resolved_risks:
         md_lines.append(f"- {risk}")
 
     md_lines.extend([
         "",
-        "## 7. Exit Strategy",
+        "## 8. Exit Strategy",
         resolved_exit,
         "",
         "---",
