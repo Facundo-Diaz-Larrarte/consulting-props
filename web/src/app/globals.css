@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+:root {
+  /* Real Estate Capital OS — Institutional Private Equity Palette (Sober, Calm, High-Trust) */
+  --background: #0d0f12;
+  --foreground: #f3f4f6;
+
+  --card: #14171d;
+  --card-foreground: #f3f4f6;
+
+  --muted: #1a1e26;
+  --muted-foreground: #8b95a5;
+
+  --accent: #222733;
+  --accent-foreground: #ffffff;
+
+  --border: #212631;
+
+  /* Restrained Financial Indicators */
+  --bullish: #22c55e;
+  --bearish: #e11d48;
+  --warning: #d97706;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum" 1;
+}
+
+.font-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #252b37;
+  border-radius: 4px;
+}
