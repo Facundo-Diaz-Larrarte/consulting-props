@@ -99,6 +99,7 @@ class TestPipelineOrchestrator:
 
         # Final stage should be PRESENTED
         assert result.pipeline_item.current_stage == DealStage.PRESENTED
+        assert result.opportunity.status == DealStage.PRESENTED
         assert result.memo is not None
         assert result.underwriting is not None
         assert result.market_audit is not None

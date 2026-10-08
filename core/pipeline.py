@@ -126,6 +126,9 @@ class DealPipelineEngine:
         if mandate and not item.mandate_id:
             item.mandate_id = mandate.id
 
+        if opportunity:
+            opportunity.status = target_stage
+
         item.transition_to(
             new_stage=target_stage,
             reason=reason,
